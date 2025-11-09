@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/performance/noImgElement: <explanation> */
+/** biome-ignore-all lint/performance/noImgElement: <> */
 "use client";
 
 import { ChevronDownIcon, PaperclipIcon } from "lucide-react";
