@@ -15,6 +15,13 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Response } from "@/components/ai-elements/response";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
 
 export default function Chat() {
   const [input, setInput] = useState<string>("");
@@ -35,18 +42,45 @@ export default function Chat() {
             messages.map((message) => (
               <Message key={message.id} from={message.role}>
                 <MessageContent>
-                  {message.role === "assistant" ? (
-                    <Response>
-                      {message.parts
-                        ?.filter((part) => part.type === "text")
-                        .map((part) => part.text)
-                        .join("")}
-                    </Response> // 👈 Wrap AI messages in Response
-                  ) : (
-                    message.parts.map(
-                      (part) => part.type === "text" && part.text,
-                    )
-                  )}
+                  {message.role === "assistant"
+                    ? message.parts.map((part, i) => {
+                        switch (part.type) {
+                          case "text":
+                            return (
+                              <Response key={`${message.id}-${i}`}>
+                                {part.text}
+                              </Response>
+                            );
+
+                          case "tool-getWeather":
+                            return (
+                              <Tool
+                                key={part.toolCallId || `${message.id}-${i}`}
+                              >
+                                <ToolHeader
+                                  type={part.type}
+                                  state={part.state}
+                                />
+                                <ToolContent>
+                                  <ToolInput input={part.input} />
+                                  <ToolOutput
+                                    output={JSON.stringify(
+                                      part.output,
+                                      null,
+                                      2,
+                                    )}
+                                    errorText={part.errorText}
+                                  />
+                                </ToolContent>
+                              </Tool>
+                            );
+                          default:
+                            return null;
+                        }
+                      })
+                    : message.parts.map(
+                        (part) => part.type === "text" && part.text,
+                      )}
                 </MessageContent>
               </Message>
             ))
